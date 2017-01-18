@@ -1,0 +1,86 @@
+---
+title: "Sesion 8 Curso de Estadistica con R"
+author: "Felipe Llaugel"
+date: "May 19, 2016"
+output: word_document
+---
+
+8.	Pruebas no paramétricas. Mann-Witney. Wilcoxon. Kruskal-Wallis. Spearman.
+
+# Pruebas no parametricas
+
+```{r Mann-Witney}
+
+library(ggplot2) # para graficos
+require(stats)   # para estadisticas
+
+# Son pruebas para datos no normalmente distribuidos o tambien en caso de muestras pequenas
+# Se usa el Test de mann-witney si las poblaciones son independientes. Se comparan las medianas de las poblaciones
+
+# Indicadores bancarios 2002-2004
+
+indicador <- read.csv(file="indicadores.csv",head=TRUE,sep=",") # datos separados por coma y con nombres de columnas
+attach(indicador) # Hace las variables visibles
+
+# probar si el indicador de cartera era igual para banco POPULAR y Reservas
+
+prueba <- subset(indicador, banco == "POPULAR" | banco=="RESERVAS",select = c(banco,I2))
+
+ attach(prueba); wilcox.test(I2~banco ,data= prueba)
+
+# probar si el indicador de morosidad era igual para banco POPULARD y Reservas
+ 
+prueba <- subset(indicador, banco == "POPULAR" | banco=="RESERVAS",select = c(banco,I15))
+
+ attach(prueba); wilcox.test(I15~banco ,data= prueba)
+
+
+
+
+
+```
+
+# Prueba de Wilcoxon
+
+```{r wilcoxon}
+
+# La prueba de los rangos con signo de Wilcoxon es una prueba no paramétrica para comparar la mediana de dos muestras relacionadas y determinar si existen diferencias entre ellas. Se utiliza como alternativa a la prueba t de Student cuando no se puede suponer la normalidad de dichas muestras
+
+
+library(MASS)  # carga paquete MASS con datasets para divresas pruebas
+head(immer)    # rendimiento de la cebada en 1931 y 1932
+
+# Compara los rendimientos de 1931 y 1932 en el mismo campo de cultivo
+
+wilcox.test(immer$Y1, immer$Y2, paired=TRUE)  
+
+
+
+
+
+```
+
+# Prueba Kruskal-Wallis
+
+```{r kruskal-wallis}
+#En estadística, la prueba de Kruskal-Wallis (de William Kruskal y W. Allen Wallis) es un método no paramétrico para probar si un grupo de datos proviene de la misma población. Intuitivamente, es idéntico al ANOVA con los datos reemplazados por categorías. Es una extensión de la prueba de la U de Mann-Whitney para 3 o más grupos.
+
+head(airquality) # Dataset de calidad del aire
+
+kruskal.test(Ozone ~ Month, data = airquality) 
+
+```
+
+# Spearman
+
+```{r spearman}
+
+# En estadística, el coeficiente de correlación de Spearman, ρ (rho) es una medida de la correlación (la asociación o interdependencia) entre dos variables aleatorias continuas. Para calcular ρ, los datos son ordenados y reemplazados por su respectivo orden. Se usa cuando los datos no son normalmente distribuidos.
+
+attach(airquality)
+
+cor.test(Ozone, Solar.R, method="spearman"); plot(Ozone, Solar.R)
+
+cor.test(Temp, Ozone, method="spearman"); plot(Temp, Ozone)
+```
+

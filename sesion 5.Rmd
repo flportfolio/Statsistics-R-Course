@@ -1,0 +1,144 @@
+---
+title: "Sesion 5 Curso de Estadistica con R"
+author: "Felipe Llaugel"
+date: "May 19, 2016"
+output: word_document
+---
+
+5.	Programacion en R. if-else. For Loops. While Loops. Repeat Loops.  Apply Function. Any, All y Which. Funciones. Creacion de funciones.
+
+# if-else and for loops
+
+```{r if-else and loops}
+
+
+x <- runif(10) ; x
+
+if (x[1] > 0.5) { print("mayor de 0.5")} else { print("menor de 0.5")}
+
+
+sqrt(ifelse(x >= 0.3 , x, NA)) # Aplicacion condicional de una funcion con vectorizacion
+
+
+i <− c(1:5)
+for (n in i) {print(n * 10)} 
+
+# Se mueve de principio a fin de vector implicitamente
+
+carbrands <− c("Honda","Toyota","Ford","GM","BMW","Fiat")
+for(brand in carbrands) {
+ print(brand)
+ }
+
+# while loops
+
+even <− 0
+while(even < 10) {
+ even <− even + 2
+ print(even)
+}
+
+# repeat loops
+
+i <− 1
+repeat {
+ print(i)
+ i <− i + 1
+ if(i > 5)
+ {break}
+ }
+
+
+```
+
+# Apply functions para loops implicitos
+
+```{r Apply functions}
+
+# Apply function aplica la funcion deseada a los elementos de un data frame, list , vector o matrix
+
+datoscsv <- read.csv(file="CAPTACIONES.csv",head=TRUE,sep=",") # datos separados por coma y con nombres de columnas
+
+# aplica la funcion median a las columnas de la 2 a l 5
+apply(datoscsv[2:5], 1, median) # Aplica la funcion median a todas las filas (1)
+apply(datoscsv[2:5], 2, median) # Aplica la funcion median a todas las columnas (2)
+
+
+lapply(datoscsv[2:5] , median) # Aplica la funcion median a solo las columnas
+
+class1 <− c(17,18,12,13,15,14,20,11,16,17)
+class2 <− c(18,15,16,19,20,20,19,17,14)
+class3 <− c(17,16,15,18,11,10)
+classes <− list(class1, class2, class3)
+
+lapply(classes, length) # aplica la funcion length a los elementos de la clase classes
+sapply(classes, length) # hace la misma funcion pero resuttado en otro formato
+sapply(classes, mean)
+sapply(classes, summary) # salida en formato de tabla
+
+# Ejemplos con tapply
+
+n <- 17; fac <- factor(rep(1:3, length = n), levels = 1:5)
+table(fac)
+tapply(1:n, fac, sum)
+tapply(1:n, fac, sum, simplify = FALSE)
+tapply(1:n, fac, range)
+tapply(1:n, fac, quantile)
+
+
+```
+
+# All, Any and Wich
+
+```{r All any wich}
+
+x <− 0:50
+primes <− x^2 - x + 41
+primes                     # Numeros primos
+
+all(primes %% 83 != 0) # Si entre todos los elementos de primes no esta el 83
+any(primes %% 83 == 0)  # Si cualquiera de los elementos de primes es el 83
+which(primes %% 83 == 0) # Cual de los elementos de primes contiene el 83
+
+
+
+
+```
+
+# Funciones
+
+```{r funciones}
+
+# Funcion para calcular la desviacion absoluta media
+
+MeanAbsDev <− function(x) {  # Pasa a la funcion el vector con los datos
+
+AbsDev <− abs(x - mean(x))
+MAD <− mean(AbsDev)
+cat("La desviacion absoluta media es: ",MAD,"\n")
+}
+
+confint <− function(x, alpha = .05) {
+conflevel = (1 - alpha)*100
+stderr <− sd(x)/sqrt(length(x))
+tcrit <− qt(1-alpha/2, length(x)-1)
+margin <− stderr * tcrit
+lower <− mean(x) - margin
+upper <− mean(x) + margin
+cat(conflevel,"% Intervalo de Confianza","\n")
+cat("Media:", mean(x), "Error estandar:", stderr,"\n")
+cat("Limite inferior:", lower, "\n")
+cat("Limite superior:", upper, "\n")
+}
+
+
+
+y <- rnorm(100,10,2) # Genera 100 numeros aleatorios con dist. normal, con media 10 y des. est. 2
+
+MeanAbsDev(y) # Calcula la desviacion absoluta media
+
+confint(y) # Calcula intervalos de confianza para la media con alfa 0.05 (default)
+confint(y, 0.1) # Calcula intervalos de confianza para la media con alfa 0.1
+
+```
+

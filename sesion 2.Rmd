@@ -1,0 +1,69 @@
+---
+title: "Sesion 2 Curso de Estadistica con R"
+author: "Felipe Llaugel"
+date: "May 19, 2016"
+output: word_document
+---
+
+Lectura y escritura de archivos: CSV, SPSS, Excel. Tablas. Selección de datos. Ordenamiento de datos. Editor de datos.
+
+# Lectura de archivos
+
+```{r lectura de archivos}
+
+# lectura de archivos csv
+
+datoscsv <- read.csv(file="CAPTACIONES.csv",head=TRUE,sep=",") # datos separados por coma y con nombres de columnas
+datoscsv
+summary(datoscsv)
+
+
+
+
+# Lectura de archivo Excel
+
+
+# install.packages("xlsx")
+# library("xlsx")  # paquete requerido para leer archivos excel
+# 
+# 
+# datosexcel= read.xlsx ("funcionarios.xlsx", sheet = 1, header = TRUE)
+
+
+# lectura de archivo SPSS
+
+library(foreign) # paquete requerido para leer archivos SPSS
+datosspss = read.spss("Elecciones2012.sav", use.value.labels = FALSE, to.data.frame=TRUE)
+
+
+
+```
+
+# Seleccion de datos
+
+```{r seleccion de datos}
+
+# Extrae solo los votos del PLD y PRD en cada provincia
+parte <- subset(datosspss,select=c(Provincia,Colegio,Tot.Inscritos,PLD,PRD))
+
+# Elimina los colegios codigo 9999
+parte <- subset(parte, Tot.Inscritos != 0)
+
+
+```
+
+# Ordenamiento de datos
+
+```{r ordenamiento de datos}
+
+gano_pld <- parte[order(parte$PLD, decreasing = TRUE),] # Ordena los colegios donde gano el PLD de mayor a menos
+
+gano_prd <- parte[order(parte$PRD, decreasing = TRUE),] # Ordena los colegios donde gano el PRD de mayor a menos
+
+x <- table(parte$Provincia) ; x <- data.frame(x); x
+
+
+
+
+```
+

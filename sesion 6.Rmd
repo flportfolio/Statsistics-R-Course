@@ -1,0 +1,208 @@
+---
+title: "Sesion 6 Curso de Estadistica con R"
+author: "Felipe Llaugel"
+date: "May 19, 2016"
+output: word_document
+---
+
+6.	Distribuciones de probabilidad. Binomial. Poison. Exponencial. Gamma. Uniforme. Cálculo de probabilidades. Intervalos de confianza para la media y para las proporciones. Prueba de medias. Análisis de varianza. 
+
+# Distribuciones de probabilidad
+
+```{r distribuciones, fig.width=10}
+
+library(ggplot2) # para graficos
+require(stats)
+
+# distribucion binomial
+
+# En estadística, la distribución binomial es una distribución de probabilidad discreta que cuenta el número de éxitos en una secuencia de n ensayos de Bernoulli independientes entre sí, con una probabilidad fija p de ocurrencia del éxito entre los ensayos. Un experimento de Bernoulli se caracteriza por ser dicotómico, esto es, sólo son posibles dos resultados. A uno de estos se denomina éxito y tiene una probabilidad de ocurrencia p y al otro, fracaso, con una probabilidad q = 1 - p. En la distribución binomial el anterior experimento se repite n veces, de forma independiente, y se trata de calcular la probabilidad de un determinado número de éxitos
+
+
+p <- 0.3 # probabilidad de exito
+n <- 10  # numero de intentos del experimento
+x <- seq(0,10,1) # posibles exitos consecutivos (0 al 10)
+x
+y <- dbinom(x,n,p) # Probabilidad de x
+y 
+plot(x,y, type="h")
+
+# Distribucion de Poisson
+
+# La distribución de Poisson es una distribución de probabilidad discreta que expresa, a partir de una frecuencia de ocurrencia media, la probabilidad de que ocurra un determinado número de eventos durante cierto período de tiempo. Concretamente, se especializa en la probabilidad de ocurrencia de sucesos con probabilidades muy pequeñas, o sucesos "raros".
+
+lambda <- 3 # Numero promedio de ocurrencias por hora
+x <- seq(0,10) # Posibles ocurrencias por hora
+y <- dpois(x,lambda) # Probabilidad de x ocurrencias en una hora (0-10)
+plot(x,y, type="h")
+y
+
+y <- ppois(x,lambda) # Probabilidad de x eventos o menos en una hora
+plot(x,y, type="h")
+
+# Distribucion exponencial
+
+# A pesar de la sencillez analítica de sus funciones de definición, la distribución exponencial tiene una gran utilidad práctica ya que podemos considerarla como un modelo adecuado para la distribución de probabilidad del tiempo de espera entre dos hechos que sigan un proceso de Poisson. De hecho la distribución exponencial puede derivarse de un proceso experimental de Poisson con las mismas características que las que enunciábamos al estudiar la distribución de Poisson, pero tomando como variable aleatoria , en este caso, el tiempo que tarda en producirse un hecho
+
+x <- rexp(100, 1/5) # Genera 100 numeros aleatorios con distribucion exponencial y media 5
+hist(x)
+y <- dexp(x,1/5) # Calcula la densidad para los valores de x
+qplot(x,y, geom="line") # Grafica de la funcion densidad
+
+pX <- pexp(x,1/5,lower.tail = TRUE) # calcula la probabilidad acumulada
+
+qplot(x,pX, geom="line")
+
+
+
+# Distribucion gamma
+
+# Esta distribucion es muy flexible debido a que tienen varios parametros(2) y puede ajusarse a muchos fenomenos de la vida real
+
+x <- seq(1,40,1)  
+y <- dgamma(x,1.5,2)
+y2 <- dgamma(x,2,2)
+y3 <- dgamma(x,3,2)
+y4 <- dgamma(x,5,1)
+y5 <- dgamma(x,9,0.5)
+plot(x,y, type = "l", main = "Familia de distribucion Gamma")
+points(x,y2, type="l", col="blue") ;points(x,y3, type="l", col="red");points(x,y4, type="l", col="orange")
+points(x,y5, type="l", col="magenta")
+n <- 5000
+x <- rgamma(n,1,2) ; param <- rep("k=1,O=2",n); d <- data.frame(x,param)
+x <- rgamma(n,2,2) ; param <- rep("k=2,O=2",n); d1 <- data.frame(x,param); d <-rbind(d,d1) 
+x <- rgamma(n,3,2) ; param <- rep("k=3,O=2",n); d1 <- data.frame(x,param); d <-rbind(d,d1) 
+x <- rgamma(n,5,1) ; param <- rep("k=5,O=1",n); d1 <- data.frame(x,param); d <-rbind(d,d1)
+x <- rgamma(n,9,0.5) ; param <- rep("k=9,O=0.5",n); d1 <- data.frame(x,param); d <-rbind(d,d1)
+
+g <- ggplot(d,aes(x))
+g <- g+ geom_density(aes(color=param))+ labs(title="Familia de distribuciones Gamma")
+g
+
+# Distribucion Uniforme
+
+## Cómo dice el nombre, la distribución uniforme es equiprobable para
+## todos los valores incluídos en un intervalo dado. Por lo tanto sólo
+## necesita un mínimo y un máximo como parámetros.
+## Al igual que todos los generadores de números de "stats", el primer
+## argumento es el número de elementos, mientras que los otros dos son
+## el mín. y máx. mencionados. Para tomar mil valores aleatorios con
+## distribución U(0,1):
+
+x <- runif(10000, 0, 1)  # 10,000 numeros aleatorios entre 0 y 1
+
+hist(x) # Bastante horizontal
+
+
+```
+
+# Calculo de Probabilidades
+
+```{r calculo de probabilidades}
+
+# Usando la distribucion normal con media 100 y desviacion estandar 15, encontrar la probabilidad de que x sea menor de 80
+
+pnorm(80,100,15, lower.tail = TRUE) # Probabilidad de que x sea menor de 80
+pnorm(50,100,15, lower.tail = FALSE) # Probabilidad de que x sea mayor de 50
+qnorm(0.95,100,15) # Valor de x superior al 95% de la poblacion
+qnorm(0.10,100,15) # Valor de x superior al 10% de la poblacion
+
+# Para una variable con distribucion de poisson y medi 10, cual es la probabilidad de que 15
+
+ppois(15,10, lower.tail = TRUE) # Probabilidad de que x sea menor de 15
+ppois(5,10, lower.tail = FALSE) # Probabilidad de que x sea mayor de 5
+qpois(0.90,10) # Valor de x superior al 90%
+ppois(15,10)- ppois(5,10) # Probabilidad de que x este entre 5 y 15
+
+
+```
+
+# Intervalo de confianza para la media
+
+```{r intervalo de confianza para media}
+x <- rnorm(25,50,3) # 25 numeros aleatorios con dist. normal, media 50 y des. est. 3
+x
+confint.mean <− function(x, alpha = .05, two.tailed = TRUE) {
+cat("\t","Intervalo de Confianza para la media","\n")
+cat("Media:",mean(x),"\n")
+df <− length(x) - 1
+stderr <− sd(x)/sqrt(length(x))
+cat("Error estandar de la media:",stderr,"\n")
+conflevel <− 1 - alpha/2
+if (two.tailed == FALSE) {
+conflevel <− 1 - alpha
+}
+tcrit <− qt(conflevel, df)
+margin <− stderr * tcrit
+LL <− mean(x) - margin
+UL <− mean(x) + margin
+if (two.tailed == FALSE) {
+cat("Para pruebas de una cola.","\n")
+cat("Si es del lado izquierdo, el limite inferior","\n")
+cat("es infinito negativo. Si es del lado positivo el limite superior","\n")
+cat("es infinito positivo.","\n")
+# cat("For a left-tailed test, the upper bound is",LL,".","\n")
+# cat("For a right-tailed test, the lower bound is",UL,".","\n")
+}
+cat("Limite inferior:",LL,"\n")
+cat("Limite Superior:",UL,"\n")
+}
+
+confint.mean(x,0.05,TRUE) # Intervalo de confianza de dos colas con alfa 0.05 
+
+
+```
+
+# Intervalo de confianza para las proporciones
+
+```{r int conf proporciones}
+
+confi.prop <− function(phat, n, alpha = .05) {
+zcrit <− qnorm(1 - alpha/2)
+margin <− zcrit*sqrt((phat*(1 - phat)/n))
+upper <− phat + margin
+lower <− phat - margin
+cat("Proporcion de la muestra:",phat,"\n")
+conf <- 100*(1-alpha)
+cat("Intervalo de confianza del ",conf,"% \n")
+cat("Limite inferior:",lower,"\n")
+cat("Limite Superior:",upper,"\n")
+}
+
+# En una encuesta de 1,500 personas la proporcion de simpatizantes del producto fue 70%. Calculemos el intervalo de confianza para la preferencia de la poblacion
+
+confi.prop(0.7,1500,0.05) # Intervalo de confianza del 95% 
+
+```
+
+# Prueba de medias
+
+```{r prueba de medias}
+
+x1 <-rnorm(100,45,5) # 100 observaciones de poblacion con media 45 y desv est 5
+x2 <- rnorm(100,50,4) # 100 observaciones de poblacion con media 50 y desv est 4
+x3 <- rnorm(100,50,5) # 100 observaciones de poblacion con media 50 y desv est 5
+
+t.test(x1,x2) ; t.test(x2,x3) ; t.test(x1,x3, var.equal = TRUE)
+
+t.test(x1, mu = 40) # Prueba la hipotsis de si la media de x1 es 40
+
+```
+
+# Analisis de Varianza
+
+```{r analisis de varianza}
+
+mpg = c(34,35,34.3,35.5,35.8,35.3,36.5,36.4,37,37.6,33.3,34,34.7,33,34.9)
+brand = c("A","A","A","A","A","B","B","B","B","B","C","C","C","C","C")
+mileage = data.frame(mpg = mpg,brand = brand)
+attach(mileage)
+mileage
+boxplot(mpg ~ brand) # Grafica de cajas
+group <− factor(brand) # Convierte a factor
+results <− aov(mpg ~ group)
+results
+summary(results)
+
+```
+

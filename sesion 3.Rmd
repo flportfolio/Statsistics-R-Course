@@ -1,0 +1,90 @@
+---
+title: "Sesion 3 Curso de Estadistica con R"
+author: "Felipe Llaugel"
+date: "May 19, 2016"
+output: word_document
+---
+
+3.	Estadística descriptiva. Media, mediana, moda, desviación estándar, varianza y rango. Cuartiles. Covarianza y Correlacion. Sesgo y curtosis. Sumario. 
+
+# Estadisticas Descriptivas
+
+```{r Estadisticas Descriptivas}
+
+library(foreign) # paquete requerido para leer archivos SPSS
+require(prettyR) # Para estadisticas descriptivas
+library(stats)   # Paquete de funciones estadisticas
+library(psych) # para calculo de sesgo y kurtosis
+
+
+datosspss = read.spss("Elecciones2012.sav", use.value.labels = FALSE, to.data.frame=TRUE)
+# Extrae solo los votos del PLD y PRD en cada provincia
+parte <- subset(datosspss,select=c(Provincia,Colegio,Tot.Inscritos,PLD,PRD))
+
+# Elimina los colegios codigo 9999
+parte <- subset(parte, Tot.Inscritos != 0)
+
+# Media
+media_votos_PLD <- mean(parte$PLD); media_votos_PLD
+# Mediana
+mediana_votos_PLD <- median(parte$PLD); mediana_votos_PLD
+# Moda
+moda_votos_PLD <- Mode(parte$PLD); moda_votos_PLD
+# Desviacion Estandar
+desvst_votos_PLD <- sd(parte$PLD); desvst_votos_PLD
+
+# Varianza 
+varianza_votos_PLD <- var(parte$PLD); varianza_votos_PLD
+
+# Rango (minimo y maximo)
+minimo_votos_PLD <- min(parte$PLD); minimo_votos_PLD
+maximo_votos_PLD <- max(parte$PLD); maximo_votos_PLD
+rango <- maximo_votos_PLD - minimo_votos_PLD; rango
+
+
+
+
+
+```
+
+# Cuartiles
+
+```{r cuartiles }
+
+quantile(parte$PLD) # Imprime los cuartiles por defecto 0%,25%,50%,75% y 100%
+
+quantile(parte$PLD,c(0.90, 0.95, 0.975)) # Imprime los cuartiles deseados
+
+
+```
+
+# Covarianza y Correlacion
+```{r covarianza y correlacion}
+
+cov(parte$PLD,parte$PRD) # Calcula covarianza entre la votacion del PLD y el PRD
+cor(parte$PLD,parte$PRD) # Calcula correlacion entre la votacion del PLD y el PRD
+
+
+
+
+```
+
+# Sesgo y Curtosis
+
+```{r sesgo y curtosis}
+
+skew(parte$PLD) # Calcula el sesgo de la votacion del PLD
+
+kurtosi(parte$PLD) # Calcula la curtosis de la votacion del PLD
+
+
+```
+
+# Estadisticas sumarias
+
+```{r suamrio}
+
+summary(datosspss) # calcula algunas estadisticas descriptivas basicas de todas las variables
+
+```
+

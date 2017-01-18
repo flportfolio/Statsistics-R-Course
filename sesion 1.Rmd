@@ -1,0 +1,153 @@
+---
+title: "Sesion 1 Curso de Estadistica con R"
+author: "Felipe Llaugel"
+date: "May 19, 2016"
+output:
+  word_document: default
+---
+
+El lenguaje R es una implementación Open Source del lenguaje S creado por John Chambers y otros en Bell Labs. Las principales ventajas del lenguaje R son, que es gratuito, que hay una gran comunidad académica que lo respalda, y que permite adaptar su implementación a las necesidades de cada usuario mediante la incorporación de “paquetes” en los cuales se adquieren funcionalidades especiales. Está disponible en las plataformas Windows, Mac y Unix. Aunque en principio R parece más difícil de aprender que una hoja de cálculo o un paquete estadístico, una vez se logra dominar lo básico, resulta mucho más efectivo, versátil y flexible.
+
+Otras de las características de R son:
+
+1.	Es el lenguaje preferido por los profesionales de la estadística e investigadores en una gran variedad de campos. 
+2.	La comunidad académica y científica contribuye constantemente con la incorporación de “paquetes” para ampliar la funcionalidad.
+3.	Para muchas tareas es mejor que SPSS, SAS y Minitab.
+4.	Permite la creación de una gran variedad de gráficos y contiene flexibles herramientas de visualización de datos.
+5.	Es el lenguaje preferido en los cursos de estadística computacional.
+6.	Existen muchos recursos en Internet disponibles gratuitamente para sacarle más provecho a R.
+7.	Es un lenguaje orientado a objetos.
+8.	Permite implementar loops implícitos, lo cual hace la codificación compacta y más rápida en la ejecución.
+9.	Debido a que está orientado al uso de vectorización, se pueden ejecutar complejas operaciones con simples comandos.
+
+En el enlace http://cran.r-project.org/ se puede descargar el lenguaje R en la versión del sistema operativo correspondiente. Aunque es suficiente este programa para explotar las ventajas del lenguaje R, es más fácil y productivo usando la herramienta RStudio, la cual se descarga e instala después del R. RStudio está disponible en www.rstudio.org. Esta herramienta se considera un Integrated Development Environment (IDE), es decir, un ambiente integrado de desarrollo. Tiene cuatro ventanas principales: a) la consola de comandos; b) el editor de códigos; c) el navegador de objetos; d) la ventana de gestión de gráficos, archivos, ayuda y paquetes. Está disponible en las versiones web, servidor y desktop.
+RStudio permite controlar el ciclo de desarrollo de las soluciones a implementar en R. Es muy útil para la depuración de código y para la exploración de datos. También facilita la gestión de los paquetes.
+Existen en internet cuantiosos recursos para implementar las operaciones más inverosímiles, publicadas en los distintos foros de usuarios.
+
+
+```{r operaciones y vectores}
+# Algunas operaciones matematicas
+2^2
+2*2
+4+1
+x <- 3          # asignacion de un valor a una variable
+x * x           # Multiplicacion de variables
+mode(x)         # despliega el tipo de variable
+
+
+x <- c(1:10)    # asigna los numeros del 1 al 10
+dim(x) <- c(2,5) # crea una matriz x de dos filas y 5 columnas
+x
+x <- c("Hello","world","!") # crea vector de strings
+mode(x)         # despliega el tipo de variable
+x <- c(TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE)
+mode(x)         # despliega el tipo de variable
+
+ls()            # despliega las variables del workspace
+
+y <- seq(1:10)  # crea vector con los numeros del 1 al 10
+z <- log(y)     # crea nuevo vector con los logaritmos de y
+z
+
+str(z) # muestra informacion basica de la variable z
+
+length(z)  # longitud de z
+
+a <- c(1:10)     # dos vectores se suman elemento por elemento
+b <- c(11:20)
+c <- a+b
+c
+
+a <- c(a,11:20)   # agrega valores al vector a
+a
+
+c <- a*b          # multiplicacion de vectores de diferete longitud
+c
+# creacion de matrices
+
+x <- c(1:10)
+x <- matrix(x,2,5)  # crea matriz de 2 filas y 5 columnas
+
+x
+
+matrix(0,5,2)  # Matriz de ceros
+
+colnames(x) <- c("A","B","C","D","E") # asigna nombre a las columnas de la matriz
+x
+
+
+```
+
+# Distribucion de digitos de Benford
+
+```{r benford}
+
+acctdata <- c(1, 132, 86.7,
+2, 50, 50.7,
+3, 32, 36.0,
+4, 20, 27.9,
+5, 19, 22.8,
+6, 11, 19.3,
+7, 10, 16.7,
+8, 9, 14.7,
+9, 5, 13.2)
+
+acctdata     # tabla con datos de la distribucion de los digitos de Benford
+acctdata <-matrix(acctdata,9,3, byrow = TRUE) # los convierte en matriz
+colnames(acctdata) <- c("digit","actual","expected") # les pone nombres a las columnas
+
+acctdata
+
+
+
+```
+
+# Estructuras de datos mas avanzadas
+
+```{r estructuras de datos}
+# las listas permiten almacenar diferentes tipos de datos juntos
+address <- list("Larry Pace","102 San Mateo Dr.","Anderson","SC",29625)
+address
+
+# los data frames permiten agrupar datos en filas y columnas
+people <-c("Kim","Bob","Ted","Sue","Liz","Amanada","Tricia","Johnathan","Luis","Isabel")
+scores <-c(17,19,24,25,16,15,23,24,29,17)
+people
+scores
+
+quiz_scores <- data.frame(people, scores)
+quiz_scores
+quiz_scores[2]  # para ver la columna 2 del data frame
+quiz_scores$scores  # para llamar la columna por su nombre
+
+# Factor  son variables que toman un numero limitado de diferentes valores
+
+data <- c(1,2,2,3,1,2,3,3,1,2,3,3,1)
+fdata <- factor(data)  
+fdata               # despues que convierte los datos en factor, muestra los niveles
+
+genero <- c(rep("hombre",20), rep("mujer", 30)) # Crea vector con 20 hombres y 30 mujeres
+genero
+genero <- factor(genero) 
+genero
+
+table(genero) # crea una tabla donde resume frecuencia por nivel del factor
+
+
+```
+
+# Uso de Paquetes
+
+Los paquetes deben ser instalados antes de usarse usando la facilidad que da RStudio para tales fines
+
+```{r uso de paquetes}
+
+
+library(foreign) # carga el paquete para leer archivos en formatos SAS, SPSS, Stata, etc
+
+datoscsv <- read.csv(file="CAPTACIONES.csv",head=TRUE,sep=",") # datos separados por coma y con nombres de columnas
+datoscsv
+summary(datoscsv)
+
+```
+

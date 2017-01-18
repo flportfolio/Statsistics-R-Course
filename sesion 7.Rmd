@@ -1,0 +1,100 @@
+---
+title: "Sesion 7 Curso de Estadistica con R"
+author: "Felipe Llaugel"
+date: "May 19, 2016"
+output: word_document
+---
+
+7.	Métodos de Regresión. Regresión lineal simple. Regresión Múltiple. Regresión logística. 
+
+
+# Metodos de regresion
+
+```{r metodos de regresion}
+
+library(ggplot2) # para graficos
+require(stats)   # para estadisticas
+
+# Lee archivo de estadisticas macroeconomicas
+estadis <- read.csv(file="ESTA0715.csv",head=TRUE,sep=",") # datos separados por coma y con nombres de columnas
+attach(estadis) # Hace las variables visibles
+summary(estadis)
+
+resultado <- lm(PIBCONST~IPC) # Ajusta modelo de regresion lineal
+summary(resultado); predicho <-predict(resultado) # Muestra resultados de la regresion y computa prediccion
+
+ggplot(estadis, aes(PIBCONST,IPC)) + geom_point() + geom_line(aes(predicho))
+
+IPC2 <- IPC^(2)
+resultado <- lm(PIBCONST~IPC+IPC2) # Ajusta modelo de regresion Cuadratico
+summary(resultado); predicho <-predict(resultado) # Muestra resultados de la regresion y computa prediccion
+
+ggplot(estadis, aes(PIBCONST,IPC)) + geom_point() + geom_line(aes(predicho))
+
+
+```
+
+# Regresion Multiple
+
+```{r regresion multiple}
+
+
+resultado <- lm(PIBCONST~IPC+EXPORTA+IMPORTA) # Ajusta modelo de regresion Multiple
+summary(resultado); predicho <-predict(resultado) # Muestra resultados de la regresion y computa prediccion
+
+ggplot(estadis, aes(PIBCONST,IPC)) + geom_point() + geom_line(aes(predicho))
+
+```
+
+# Regresion Logistica
+
+```{r regresion logistica}
+
+# Lee archivo de diagnostico de cancer de mama
+peso <- read.csv(file="lowbwt.csv",head=TRUE,sep=",") # datos separados por coma y con nombres de columnas
+attach(peso) # Hace las variables visibles
+
+head(peso)
+xtabs(~ LOW + RACE , data = peso) # Tabla de contingencia
+RACE <- factor(RACE) # Convierte la raza en factor
+
+resultado <- glm(LOW~AGE+LWT+RACE+FTV, family="binomial")
+summary(resultado)
+
+# mejorando el modelo
+
+resultado <- glm(LOW~LWT+SMOKE+PTL+HT-1, family="binomial") # -1 para eliminar la constante
+summary(resultado)  # plot(resultado)
+
+# Tabla de contingencia para el modelo
+ajuste <- ifelse(resultado$fitted.values>0.5,1,0)
+peso <- cbind(peso,ajuste)
+xtabs(~ LOW + ajuste , data = peso) # Tabla de contingencia
+
+# Crisis financiera del 2003
+
+indicador <- read.csv(file="indicadores.csv",head=TRUE,sep=",") # datos separados por coma y con nombres de columnas
+attach(indicador) # Hace las variables visibles
+
+
+resultado <- glm(estatus~I6+I8+I10+I14+I20+I22+I23+I25+I27, family="binomial") 
+summary(resultado) 
+
+# Tabla de contingencia para el modelo
+ajuste <- ifelse(resultado$fitted.values>0.5,1,0)
+peso <- cbind(indicador,ajuste)
+xtabs(~ estatus + ajuste , data = indicador) # Tabla de contingencia
+
+# mejorando el modelo
+
+resultado <- glm(estatus~I7+I19+I25, family="binomial") 
+summary(resultado)  
+
+# Tabla de contingencia para el modelo
+ajuste <- ifelse(resultado$fitted.values>0.5,1,0)
+peso <- cbind(indicador,ajuste)
+xtabs(~ estatus + ajuste , data = indicador) # Tabla de contingencia
+plot(resultado)
+
+```
+

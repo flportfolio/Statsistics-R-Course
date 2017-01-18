@@ -1,0 +1,368 @@
+---
+title: "Sesion 4 Curso de Estadistica con R"
+author: "Felipe Llaugel"
+date: "May 19, 2016"
+output: word_document
+---
+
+4.	Visualización de datos. Scater plots. Line graph. Bar graph. Histogram. Box Plot. Ploting curves. Annotations. Legends. Facets. Colors. Miscelaneus. Graficos 3D. Output. Paquete ggplot2. Maps.
+
+# Lectura de datos
+
+```{r lectura de datos}
+
+library(foreign) # paquete requerido para leer archivos SPSS
+require(prettyR) # Para estadisticas descriptivas
+library(stats)   # Paquete de funciones estadisticas
+library(psych) # para calculo de sesgo y kurtosis
+library(ggplot2) # paquete especializado para graficos
+library(gcookbook) # paquete con ejemplos de graficos ggplot2
+library(scatterplot3d)  # Para graficos 3D
+library(sp) # para los mapas
+library(mapproj) # para los mapas
+
+datosspss = read.spss("Elecciones2012.sav", use.value.labels = FALSE, to.data.frame=TRUE)
+# Extrae solo los votos de algunos partidos en cada provincia
+parte <- subset(datosspss,select=c(Provincia,Colegio,Tot.Inscritos,PLD,PRD,PRSC,BIS,FNP,PQDC,PTD,PPC))
+
+
+
+# Elimina los colegios codigo 9999
+parte <- subset(parte, Tot.Inscritos != 0)
+
+
+```
+
+# Scater plots
+
+```{r Scater plots }
+plot(parte$PLD) # Grafica de puntos de la votacion del PLD
+plot(parte$PLD,parte$PRD) # Grafica de puntos de la votacion de ambos partidos
+
+
+```
+
+# Line graph
+
+```{r line graph }
+votos_pld <- parte[order(parte$PLD, decreasing = FALSE),] # Ordena la votacion del PLD de menor a mayor
+pld <- votos_pld$PLD # extrae solo los votos del PLD
+
+votos_prd <- parte[order(parte$PRD, decreasing = FALSE),] # Ordena la votacion del PRD de menor a mayor
+prd <- votos_prd$PRD # extrae solo los votos del PRD
+
+plot(pld, type="l", xlab = "caso", ylab="Votos PLD", col = "magenta", main = "Votacion PLD") # Grafica de linea de la votacion del PLD
+
+plot(prd, type="l", xlab = "caso", ylab="Votos PRD", col = "blue", main = "Votacion PRD") # Grafica de linea de la votacion del PRD
+
+# Comparacion cotos PLD y PRD
+plot(pld, prd, type="l", xlab = "PLD", ylab="PRD", col = "red", main = "Votacion PLD vs PRD") # Grafica de linea de la votacion del PRD vs PLD
+
+
+```
+
+# Bar graph
+
+```{r bar graph}
+parte <- subset(datosspss,select=c(Provincia,Colegio,Tot.Inscritos,PLD,PRD,PRSC,BIS,FNP,PQDC,PTD,PPC))
+
+# Suma la votacion de cada partido
+PLD <- sum(parte$PLD); PRD <- sum(parte$PRD); PRSC <- sum(parte$PRSC); BIS <- sum(parte$BIS)
+FNP <- sum(parte$FNP) ; PQDC <- sum(parte$PQDC); PTD <- sum(parte$PTD); PPC <- sum(parte$PPC)
+
+# agrupa todas las sumas en un data frame
+votos <- rbind(PLD,PRD,PRSC,BIS,FNP,PQDC,PTD,PPC)/10000 # multiplos de 10,000
+rownames(votos) <- c("PLD","PRD","PRSC","BIS","FNP","PQDC","PTD","PPC") ; votos
+
+barplot(t(votos),cex.names=0.8, las=2, ylim=c(0,200), col = "red", ylab="Votos (x10,000)", main="Votos por Partido")
+
+
+```
+
+# Histograma
+
+```{r histograma}
+hist(prd, xlab = "Votos PRD", ylab="Frecuencia", col = "blue", main = "Votacion PRD", nclass = 30) # Histograma de votacion del PRD
+
+hist(pld, xlab = "Votos PLD", ylab="Frecuencia", col = "magenta", main = "Votacion PLD",  nclass = 30) # Histograma de votacion del PLD
+
+```
+
+# Boxplot
+```{r boxplot}
+cajas <- subset(parte, select=c(PLD,PRD,PRSC,BIS)) # prepara data frame para grafica
+
+boxplot(cajas, ylab="Votos por colegio", main="Diagrama de cajas de votacion/colegio")
+
+```
+
+# Ploting curves
+```{r ploting curves}
+
+x <- seq(0,40,0.5) # Secuencia de numeros del 0 a 40 en incrementos de 0.5
+y1 <- dnorm(x,20,3) # Densidad de distribucion normal con media 20 y desv estandar 3
+y2 <- dnorm(x,20,6) # Densidad de distribucion normal con media 20 y desv estandar 6
+plot(x,y1, type="l", main="Curvas con distribucion normal", col="red", ylab = "y")
+points(x,y2, type="l", col="blue")
+
+# Grafica de un polinomio
+x <- seq(-10,10, 0.1)          # Usar siempre la funcion seq(x,x,x) y no c(x:x,x)
+y <- -1000.3  -x^4 + x^3 -x^2 +x
+plot(x,y, type = "l",  main = "Grafica de una Funcion")  
+
+# Grafica de funcion seno implicita
+plot(sin, -pi, 2*pi)
+
+```
+
+
+# Annotations. Legends. Facets. Colors. Miscelaneus.
+```{r Annotations etc, fig.width=10}
+
+par(mfrow=c(1,2))   # divide la pantalla en dos
+# Grafica de un polinomio
+x <- seq(-10,10, 0.1)          
+y <- -1000 + x^3 -x^2 +x
+plot(x,y, type = "l",  main = "Grafica de una Funcion", col="red") 
+text(5,-1500,"y= -1000 +x^3-x^2+x")  # agrega texto con formula
+abline(v=0,lty=2,col="blue")        # agrega linea vertival azul en 0
+abline(h=-1000,lty=2,col="blue")        # agrega linea horizontal azul en -1000
+legend("topleft","y en funcion de x")
+
+x <- seq(-10,10, 0.1)          
+y <- 1000 - x^3 +x^2 -x
+plot(x,y, type = "l",  main = "Grafica de una Funcion", col="blue") 
+text(5,1500,"y= 1000 -x^3+x^2-x")  # agrega texto con formula
+abline(v=0,lty=2,col="red")        # agrega linea vertival roja en 0
+abline(h=1000,lty=2,col="red")        # agrega linea horizontal roja en 1000
+legend("topleft","y en funcion de x")
+```
+
+# Graficos 3D
+```{r graficos 3D}
+
+scatterplot3d(iris[,1:3])
+scatterplot3d(iris[,1:3], pch = 16, color="steelblue")
+
+colors <- c("#999999", "#E69F00", "#56B4E9")
+colors <- colors[as.numeric(iris$Species)]
+
+s3d <- scatterplot3d(iris[,1:3], pch = 16, color=colors)
+legend("bottom", legend = levels(iris$Species),
+      col =  c("#999999", "#E69F00", "#56B4E9"), pch = 16, 
+      inset = -0.25, xpd = TRUE, horiz = TRUE)
+
+
+```
+
+
+
+# output
+
+```{r output}
+
+# para guardar un grafico
+
+jpeg('graficos.jpg') # Grafico a grabar y preparacion de salida
+
+x <- seq(-10,10, 0.1)          
+y <- 1000 - x^3 +x^2 -x
+plot(x,y, type = "l",  main = "Grafica de una Funcion", col="blue") 
+text(5,1500,"y= 1000 -x^3+x^2-x")  # agrega texto con formula
+abline(v=0,lty=2,col="red")        # agrega linea vertival roja en 0
+abline(h=1000,lty=2,col="red")        # agrega linea horizontal roja en 1000
+legend("topleft","y en funcion de x")
+
+dev.off() # cierra el device despues de grabar el grafico
+
+pdf("grafica.pdf", width=4, height=4)  # para salida en formato PDF
+
+x <- seq(-10,10, 0.1)          
+y <- -1000 + x^3 -x^2 +x
+plot(x,y, type = "l",  main = "Grafica de una Funcion", col="red") 
+text(5,-1500,"y= -1000 +x^3-x^2+x")  # agrega texto con formula
+abline(v=0,lty=2,col="blue")        # agrega linea vertival azul en 0
+abline(h=-1000,lty=2,col="blue")        # agrega linea horizontal azul en -1000
+legend("topleft","y en funcion de x")
+
+dev.off() # cierra el device despues de grabar el grafico
+
+
+```
+
+# Paquete ggplot2
+
+```{r ggplot2 }
+
+qplot(wt, mpg, data=mtcars) # datos del archivo cars, que es parte de R, scatter plot
+qplot(temperature, pressure, data=pressure, geom="line") # pressure tambien parte de R, grafico de linea
+qplot(mtcars$cyl, geom = "bar")  # cyl como variable continua
+qplot(factor(mtcars$cyl), geom = "bar") # cyl como variable discreta
+ggplot(mtcars, aes(x=mpg)) + geom_histogram(binwidth=4) # histograma
+qplot(ToothGrowth$supp, ToothGrowth$len, geom="boxplot") # box plot
+ggplot(ToothGrowth, aes(x=supp, y=len)) + geom_boxplot() # otra forma
+
+ggplot(cabbage_exp, aes(x=Date, y=Weight, fill=Cultivar)) + geom_bar(position="dodge", stat="identity") # Aqui es importante incluir stat="identity" para que no cuente en las barras(default)
+
+# la misma grafica con mas detalles
+
+ggplot(cabbage_exp, aes(x=Date, y=Weight, fill=Cultivar)) +
+geom_bar(stat="identity", position="dodge") +
+geom_text(aes(label=Weight), vjust=1.5, colour="white",
+position=position_dodge(.9), size=3)
+
+ggplot(cabbage_exp, aes(x=Date, y=Weight, fill=Cultivar)) +
+geom_bar(position="dodge", colour="black", stat="identity") +
+scale_fill_brewer(palette="Pastel1")
+
+ggplot(diamonds, aes(x=cut)) + geom_bar()
+
+upc <- subset(uspopchange, rank(Change)>40)
+upc
+# cambia color de barra de acuerdo a variable Region
+
+ggplot(upc, aes(x=Abb, y=Change, fill=Region)) + geom_bar(stat="identity")
+
+# Grafica de puntos de los 25 mejores bateadores
+
+tophit <- tophitters2001[1:25, ] # Toma los primeros 25 bateadores
+tophit
+ggplot(tophit, aes(x=avg, y=name)) + geom_point()
+
+# La misma grafica pero horizontal
+
+ggplot(tophit, aes(x=reorder(name, avg), y=avg)) +
+geom_point(size=3) + # Use a larger dot
+theme_bw() + theme(axis.text.x = element_text(angle=60, hjust=1))
+
+# Agrupado por liga (Americana y Nacional) 
+
+ggplot(tophit, aes(x=avg, y=name)) +
+geom_segment(aes(yend=name), xend=0, colour="grey50") +
+geom_point(size=3, aes(colour=lg)) +
+scale_colour_brewer(palette="Set1", limits=c("NL","AL"), guide=FALSE) +
+theme_bw() +
+theme(panel.grid.major.y = element_blank()) +
+facet_grid(lg ~ ., scales="free_y", space="free_y")
+
+
+# Graficos de linea con puntos variados
+# Load plyr so we can use ddply() to create the example data set
+library(plyr)
+# Summarize the ToothGrowth data
+tg <- ddply(ToothGrowth, c("supp", "dose"), summarise, length=mean(len))
+
+ggplot(tg, aes(x=dose, y=length, shape=supp)) + geom_line() +
+geom_point(size=4) # Make the points a little larger
+
+ggplot(tg, aes(x=dose, y=length, fill=supp)) + geom_line() +
+geom_point(size=4, shape=21) # Also use a point with a color fill
+
+# Convert the sunspot.year data set into a data frame for this example
+sunspotyear <- data.frame(
+Year = as.numeric(time(sunspot.year)),
+Sunspots = as.numeric(sunspot.year)
+)
+
+ggplot(sunspotyear, aes(x=Year, y=Sunspots)) +
+geom_area(colour="black", fill="blue", alpha=.2)
+
+# Grafica de area
+
+ggplot(uspopage, aes(x=Year, y=Thousands, fill=AgeGroup)) + geom_area()
+
+
+# Grafica de region sombreada
+
+clim <- subset(climate, Source == "Berkeley",
+select=c("Year", "Anomaly10y", "Unc10y"))
+clim
+# Shaded region
+ggplot(clim, aes(x=Year, y=Anomaly10y)) +
+geom_ribbon(aes(ymin=Anomaly10y-Unc10y, ymax=Anomaly10y+Unc10y),
+alpha=0.2) +
+geom_line()
+
+# Grafica de puntos
+
+ggplot(heightweight, aes(x=ageYear, y=heightIn, colour=sex)) + geom_point()
+
+# con linea ajustada
+ggplot(heightweight, aes(x=ageYear, y=heightIn, colour=sex)) + geom_point() +  geom_smooth(se = F)
+
+# tres variables
+ggplot(heightweight, aes(x=ageYear, y=heightIn, colour=weightLb)) + geom_point()
+
+# Bubble chart, 4 variables
+
+ggplot(heightweight, aes(x=ageYear, y=heightIn, size=weightLb, colour=sex)) + geom_point()
+
+# The base plot
+sp <- ggplot(heightweight, aes(x=ageYear, y=heightIn))
+sp + geom_point() + stat_smooth(method=lm)  # Ajuste de modelo lienal
+
+# Anotando puntos
+
+subset(countries, Year==2009 & healthexp>2000)
+
+sp <- ggplot(subset(countries, Year==2009 & healthexp>2000),
+aes(x=healthexp, y=infmortality)) +geom_point()
+sp + geom_text(aes(label=Name), size=4)
+
+
+
+
+
+```
+
+# Maps.
+```{r  Maps}
+# Get map data for USA
+states_map <- map_data("state")
+ggplot(states_map, aes(x=long, y=lat, group=group)) +
+geom_polygon(fill="white", colour="black")
+
+# the DR "shapefile"
+download.file("http://biogeo.ucdavis.edu/data/gadm2/R/DOM_adm1.RData", "DOM_adm1.RData")
+load("DOM_adm1.RData")
+
+# for plotting with ggplot2
+dr_map <- fortify(gadm)
+
+# build some sample data, note that we'll be using
+# the polygon "id" for plotting so you'll need that in the
+# data frame
+set.seed(1492)
+choro <- data.frame(id=gadm@data$ID_1,
+                    place=gadm@data$NAME_1,
+                    value=sample(1000, nrow(gadm@data))) # Geospatial representation of economic data
+
+# you can look at the data with this (it won't be shown here)
+choro
+
+choro$id <- seq(1,32,1) # Reasigna los ID de provincia de forma correcta. Estrelleta es Elias Pina
+
+
+# plot
+gg <- ggplot()
+# base map layer
+gg <- gg + geom_map(data=dr_map, map=dr_map,
+                    aes(x=long, y=lat, map_id=id),
+                    fill="white", color="black")
+gg
+# DR choro layer
+gg <- gg + geom_map(data=choro, map=dr_map, 
+                    aes(fill=value, map_id=id), 
+                    color="black")
+
+
+
+# move legend
+gg <- gg + theme(legend.position="bottom") +scale_fill_gradient2(low="blue", mid="green", high="red",
+midpoint=median(choro$value))
+
+# plot it
+gg
+
+```
+
